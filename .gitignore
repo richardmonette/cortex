@@ -1,0 +1,348 @@
+
+# /
+/*.so
+/*.dylib
+/.sconsign.dblite
+/config.log
+/.sconf_temp
+/plugins
+/lib
+/.cproject
+/.project
+/.pydevproject
+/build
+/.settings
+/env.tcsh
+/gaffer.options
+
+# /config/ie/
+/config/ie/.sconsign*
+
+# /contrib/IECoreAlembic/src/IECoreAlembic/
+/contrib/IECoreAlembic/src/IECoreAlembic/*.os
+
+# /contrib/IECoreAlembic/src/IECoreAlembic/bindings/
+/contrib/IECoreAlembic/src/IECoreAlembic/bindings/*.os
+
+# /contrib/IECoreArnold/python/IECoreArnold/
+/contrib/IECoreArnold/python/IECoreArnold/*.so
+
+# /contrib/IECoreArnold/src/IECoreArnold/
+/contrib/IECoreArnold/src/IECoreArnold/*.os
+
+# /contrib/IECoreArnold/src/IECoreArnold/bindings/
+/contrib/IECoreArnold/src/IECoreArnold/bindings/*.os
+
+# /contrib/IECoreArnold/src/IECoreArnold/mtoaExtension/
+/contrib/IECoreArnold/src/IECoreArnold/mtoaExtension/*.os
+
+# /contrib/IECoreArnold/src/IECoreArnold/outputDriver/
+/contrib/IECoreArnold/src/IECoreArnold/outputDriver/*.so
+/contrib/IECoreArnold/src/IECoreArnold/outputDriver/*.os
+
+# /contrib/IECoreArnold/src/IECoreArnold/procedural/
+/contrib/IECoreArnold/src/IECoreArnold/procedural/*.so
+/contrib/IECoreArnold/src/IECoreArnold/procedural/*.os
+
+# /contrib/IECoreMantra/
+/contrib/IECoreMantra/plugins
+
+# /contrib/IECoreMantra/src/IECoreMantra/
+/contrib/IECoreMantra/src/IECoreMantra/*.os
+
+# /contrib/IECoreMantra/src/IECoreMantra/bindings/
+/contrib/IECoreMantra/src/IECoreMantra/bindings/*.os
+
+# /contrib/IECoreMantra/src/IECoreMantra/procedural/
+/contrib/IECoreMantra/src/IECoreMantra/procedural/*.os
+
+# /contrib/IECoreMantra/test/IECoreMantra/
+/contrib/IECoreMantra/test/IECoreMantra/results.txt
+
+# /doc/
+/doc/html
+/doc/python
+
+# /python/IECore/
+/python/IECore/*.pyc
+/python/IECore/*.so
+
+# /python/IECoreGL/
+/python/IECoreGL/*.pyc
+/python/IECoreGL/*.so
+
+# /python/IECoreHoudini/
+/python/IECoreHoudini/_IECoreHoudini.so
+/python/IECoreHoudini/*.pyc
+
+# /python/IECoreMaya/
+/python/IECoreMaya/*.so
+/python/IECoreMaya/*.pyc
+
+# /python/IECoreNuke/
+/python/IECoreNuke/*.pyc
+
+# /python/IECoreRI/
+/python/IECoreRI/*.pyc
+/python/IECoreRI/*.so
+
+# /python/IECoreTruelight/
+/python/IECoreTruelight/*.so
+/python/IECoreTruelight/*.pyc
+
+# /scripts/
+/scripts/do
+
+# /src/
+/src/*.os
+
+# /src/IECore/
+/src/IECore/*.os
+
+# /src/IECoreGL/
+/src/IECoreGL/*.os
+
+# /src/IECoreGL/bindings/
+/src/IECoreGL/bindings/*.os
+
+# /src/IECoreHoudini/
+/src/IECoreHoudini/*.os
+
+# /src/IECoreHoudini/bindings/
+/src/IECoreHoudini/bindings/*.os
+
+# /src/IECoreHoudini/plugin/
+/src/IECoreHoudini/plugin/*.os
+
+# /src/IECoreMaya/
+/src/IECoreMaya/*.os
+
+# /src/IECoreMaya/bindings/
+/src/IECoreMaya/bindings/*.os
+
+# /src/IECoreMaya/plugin/
+/src/IECoreMaya/plugin/*.os
+
+# /src/IECoreNuke/
+/src/IECoreNuke/*.os
+
+# /src/IECoreNuke/bindings/
+/src/IECoreNuke/bindings/*.os
+
+# /src/IECoreNuke/plugin/
+/src/IECoreNuke/plugin/*.os
+
+# /src/IECorePython/
+/src/IECorePython/*.os
+
+# /src/IECorePythonModule/
+/src/IECorePythonModule/*.os
+
+# /src/IECoreRI/
+/src/IECoreRI/*.os
+
+# /src/IECoreRI/bindings/
+/src/IECoreRI/bindings/*.os
+
+# /src/IECoreTruelight/
+/src/IECoreTruelight/*.os
+
+# /src/IECoreTruelight/bindings/
+/src/IECoreTruelight/bindings/*.os
+
+# /src/rmanDisplays/ieDisplay/
+/src/rmanDisplays/ieDisplay/*.so
+/src/rmanDisplays/ieDisplay/*.os
+
+# /src/rmanProcedurals/python/
+/src/rmanProcedurals/python/*.os
+/src/rmanProcedurals/python/*.so
+
+# /test/
+/test/*.pyc
+/test/IECoreTest
+
+# /test/IECore/
+/test/IECore/*.pyc
+/test/IECore/results.txt
+/test/IECore/resultsPython.txt
+/test/IECore/IECoreTest
+
+# /test/IECore/data/
+/test/IECore/data/*testoutput*
+
+# /test/IECore/data/cinFiles/
+/test/IECore/data/cinFiles/*testoutput*
+
+# /test/IECore/data/cobFiles/
+/test/IECore/data/cobFiles/*testoutput*
+
+# /test/IECore/data/dpx/
+/test/IECore/data/dpx/*testoutput*
+
+# /test/IECore/data/exrFiles/
+/test/IECore/data/exrFiles/*testoutput*
+
+# /test/IECore/data/fioFiles/
+/test/IECore/data/fioFiles/*testoutput*
+
+# /test/IECore/data/jpg/
+/test/IECore/data/jpg/*testoutput*
+
+# /test/IECore/data/nukeScripts/
+/test/IECore/data/nukeScripts/*testoutput*
+
+# /test/IECore/data/obj/
+/test/IECore/data/obj/*testoutput*
+
+# /test/IECore/data/pdcFiles/
+/test/IECore/data/pdcFiles/*testoutput*
+
+# /test/IECore/data/ribFiles/
+/test/IECore/data/ribFiles/*testoutput*
+
+# /test/IECore/data/tiff/
+/test/IECore/data/tiff/*testoutput*
+
+# /test/IECore/ops/
+/test/IECore/ops/*.pyc
+
+# /test/IECore/ops/bad/
+/test/IECore/ops/bad/*.pyc
+
+# /test/IECore/ops/classParameterTest/
+/test/IECore/ops/classParameterTest/*.pyc
+
+# /test/IECore/ops/classVectorParameterTest/
+/test/IECore/ops/classVectorParameterTest/*.pyc
+
+# /test/IECore/ops/colorSplineInput/
+/test/IECore/ops/colorSplineInput/*.pyc
+
+# /test/IECore/ops/compoundObjectInOut/
+/test/IECore/ops/compoundObjectInOut/*.pyc
+
+# /test/IECore/ops/floatParameter/
+/test/IECore/ops/floatParameter/*.pyc
+
+# /test/IECore/ops/maths/
+/test/IECore/ops/maths/*.pyc
+
+# /test/IECore/ops/maths/multiply/
+/test/IECore/ops/maths/multiply/*.pyc
+
+# /test/IECore/ops/matrixParameter/
+/test/IECore/ops/matrixParameter/*.pyc
+
+# /test/IECore/ops/mayaUserData/
+/test/IECore/ops/mayaUserData/*.pyc
+
+# /test/IECore/ops/meshMerge/
+/test/IECore/ops/meshMerge/*.pyc
+
+# /test/IECore/ops/parameterTypes/
+/test/IECore/ops/parameterTypes/*.pyc
+
+# /test/IECore/ops/path.With.Dot/
+/test/IECore/ops/path.With.Dot/*.pyc
+
+# /test/IECore/ops/path.With.Dot/multiply/
+/test/IECore/ops/path.With.Dot/multiply/*.pyc
+
+# /test/IECore/ops/presetParsing/
+/test/IECore/ops/presetParsing/*.pyc
+
+# /test/IECore/ops/splineInput/
+/test/IECore/ops/splineInput/*.pyc
+
+# /test/IECore/ops/stringParsing/
+/test/IECore/ops/stringParsing/*.pyc
+
+# /test/IECore/ops/unstorable/
+/test/IECore/ops/unstorable/*.pyc
+
+# /test/IECore/procedurals/image/
+/test/IECore/procedurals/image/*.pyc
+
+# /test/IECore/procedurals/read/
+/test/IECore/procedurals/read/*.pyc
+
+# /test/IECoreGL/
+/test/IECoreGL/*.pyc
+
+# /test/IECoreHoudini/
+/test/IECoreHoudini/*.pyc
+/test/IECoreHoudini/resultsPython.txt
+
+# /test/IECoreHoudini/ops/cobReader/
+/test/IECoreHoudini/ops/cobReader/*.pyc
+
+# /test/IECoreHoudini/ops/meshNormalsOp/
+/test/IECoreHoudini/ops/meshNormalsOp/*.pyc
+
+# /test/IECoreHoudini/ops/multiTypeObject/
+/test/IECoreHoudini/ops/multiTypeObject/*.pyc
+
+# /test/IECoreHoudini/ops/noiseDeformer/
+/test/IECoreHoudini/ops/noiseDeformer/*.pyc
+
+# /test/IECoreHoudini/ops/objectDebug/
+/test/IECoreHoudini/ops/objectDebug/*.pyc
+
+# /test/IECoreHoudini/ops/parameters/compoundParameters/
+/test/IECoreHoudini/ops/parameters/compoundParameters/*.pyc
+
+# /test/IECoreHoudini/ops/parameters/primitives/pointParam/
+/test/IECoreHoudini/ops/parameters/primitives/pointParam/*.pyc
+
+# /test/IECoreHoudini/ops/parameters/primitives/polyParam/
+/test/IECoreHoudini/ops/parameters/primitives/polyParam/*.pyc
+
+# /test/IECoreHoudini/ops/parameters/primitives/primParam/
+/test/IECoreHoudini/ops/parameters/primitives/primParam/*.pyc
+
+# /test/IECoreHoudini/ops/swapAttribute/
+/test/IECoreHoudini/ops/swapAttribute/*.pyc
+
+# /test/IECoreHoudini/ops/vectors/V3fVectorAdder/
+/test/IECoreHoudini/ops/vectors/V3fVectorAdder/*.pyc
+
+# /test/IECoreHoudini/ops/vectors/V3fVectorCreator/
+/test/IECoreHoudini/ops/vectors/V3fVectorCreator/*.pyc
+
+# /test/IECoreHoudini/procedurals/meshRender/
+/test/IECoreHoudini/procedurals/meshRender/*.pyc
+
+# /test/IECoreHoudini/procedurals/parameterTypes/
+/test/IECoreHoudini/procedurals/parameterTypes/*.pyc
+
+# /test/IECoreHoudini/procedurals/pointRender/
+/test/IECoreHoudini/procedurals/pointRender/*.pyc
+
+# /test/IECoreHoudini/procedurals/primitiveParameters/meshRender/
+/test/IECoreHoudini/procedurals/primitiveParameters/meshRender/*.pyc
+
+# /test/IECoreHoudini/procedurals/primitiveParameters/multiple/
+/test/IECoreHoudini/procedurals/primitiveParameters/multiple/*.pyc
+
+# /test/IECoreHoudini/procedurals/sphereProcedural/
+/test/IECoreHoudini/procedurals/sphereProcedural/*.pyc
+
+# /test/IECoreMaya/
+/test/IECoreMaya/*.pyc
+/test/IECoreMaya/results.txt
+/test/IECoreMaya/resultsPython.txt
+/test/IECoreMaya/IECoreMayaTest
+
+# /test/IECoreNuke/
+/test/IECoreNuke/*.pyc
+/test/IECoreNuke/resultsPython.txt
+
+# /test/IECoreRI/
+/test/IECoreRI/*.pyc
+/test/IECoreRI/results.txt
+/test/IECoreRI/resultsPython.txt
+
+# /test/IECoreTruelight/
+/test/IECoreTruelight/*.pyc
+/test/IECoreTruelight/resultsPython.txt
