@@ -103,17 +103,17 @@ class SceneShapeInterface: public MPxComponentShape
 		/// Returns the sceneInterface for this node. Needs to be implemented by derived classes.
 		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
 		
-		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawChildBounds )
+		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawLocators, drawChildBounds )
 		IECoreGL::ConstScenePtr glScene();
 		
 		/// Returns GL Group matching the given path name.
-		IECoreGL::GroupPtr glGroup( std::string name );
+		IECoreGL::GroupPtr glGroup( const IECore::InternedString &name );
 		/// Returns the internal index stored for the given path
-		int selectionIndex( std::string name );
+		int selectionIndex( const IECore::InternedString &name );
 		/// Returns the path name for the given index
-		std::string selectionName( int index );
+		IECore::InternedString selectionName( int index );
 		/// Returns all component names currently existing in the shape
-		const std::vector< IECore::InternedString > & childrenNames() const;
+		const std::vector< IECore::InternedString > & componentNames() const;
 
 	protected :
 		

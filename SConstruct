@@ -997,7 +997,7 @@ env.Append(
 		"-DIE_CORE_MAJORVERSION=$IECORE_MAJOR_VERSION",
 		"-DIE_CORE_MINORVERSION=$IECORE_MINOR_VERSION",
 		"-DIE_CORE_PATCHVERSION=$IECORE_PATCH_VERSION",
-		"-DBOOST_FILESYSTEM_VERSION=2",
+		"-DBOOST_FILESYSTEM_VERSION=3",
 	]
 )
 
@@ -1644,6 +1644,10 @@ if doConfigure :
 		if c.CheckFunc( "RiObjectBeginV" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
+			
+		if c.CheckFunc( "RiProceduralV" ) :
+			
+			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_PROCEDURALV" ] )
 		
 		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
 		
@@ -1802,8 +1806,10 @@ if env["WITH_GL"] and doConfigure :
 		
 		"CXXFLAGS" : [
 			"-isystem", "$GLEW_INCLUDE_PATH",
-			# This is to allow a formatting warning in boost::wave
-			"-Wno-format"
+			# These are to work around warnings in boost::wave
+			# while still using -Werror.
+			"-Wno-format",
+			"-Wno-strict-aliasing",
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",

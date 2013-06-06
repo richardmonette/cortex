@@ -45,6 +45,7 @@
 #include "IECore/Transform.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/Group.h"
+#include "IECore/MurmurHash.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/format.hpp"
@@ -83,6 +84,12 @@ std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 
 IECoreRI::RendererImplementation::RendererImplementation( RendererImplementationPtr parent )
 	:	m_context( 0 ), m_sharedData( parent ? parent->m_sharedData : SharedData::Ptr( new SharedData ) ), m_options( parent ? parent->m_options : 0 )
+{
+	constructCommon();
+}
+
+IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
 {
 	constructCommon();
 }
@@ -1459,9 +1466,36 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;
-	data->parentRenderer = this;
+	data->sharedData = m_sharedData;
+	data->options = m_options;
 	
+#ifdef IECORERI_WITH_PROCEDURALV
+	
+	IECore::MurmurHash h = proc->hash();
+	
+	if( h == IECore::MurmurHash() )
+	{
+		// empty hash => no procedural level instancing
+		RiProcedural( data, riBound, procSubdivide, procFree );
+	}
+	else
+	{
+		std::string hashStr = h.toString();
+
+		// specify an instance key for procedural level instancing
+		const char *tokens[] = { "instancekey" };
+		const char *keyPtr = hashStr.c_str();
+		void *values[] = { &keyPtr };
+
+		RiProceduralV( data, riBound, procSubdivide, procFree, 1, tokens, values );
+	}
+	
+#else
+
 	RiProcedural( data, riBound, procSubdivide, procFree );
+	
+#endif
+
 }
 
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
@@ -1472,7 +1506,7 @@ void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 	// and the original renderer would be trying to switch to its original context. so we just create a temporary
 	// renderer which doesn't own a context and therefore use the context 3delight has arranged to call subdivide with.
 	// we do however share SharedData with the parent renderer, so that we can share instances among procedurals.
-	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->parentRenderer ) );
+	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->sharedData, proceduralData->options ) );
 	proceduralData->procedural->render( renderer );
 }
 

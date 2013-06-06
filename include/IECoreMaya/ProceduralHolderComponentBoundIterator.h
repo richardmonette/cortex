@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +32,62 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORERI_FILTER_H
-#define IECORERI_FILTER_H
+#ifndef IECOREMAYA_PROCEDURALHOLDERCOMPONENTBOUNDITERATOR_H
+#define IECOREMAYA_PROCEDURALHOLDERCOMPONENTBOUNDITERATOR_H
 
-#define IECORERI_FILTER_MIN_WIDTH 1.0e-6
+#include "maya/MPxGeometryIterator.h"
+#include "maya/MPoint.h"
+#include "maya/MBoundingBox.h"
+#include "maya/MObjectArray.h"
 
-float ieFilterWidth( float x )
+#include "OpenEXR/ImathBox.h"
+
+#include "IECoreMaya/ProceduralHolder.h"
+
+namespace IECoreGL
 {
-	extern float du;
-	extern float dv;
-	return max( abs( Du( x ) * du ) + abs( Dv( x ) * du ), IECORERI_FILTER_MIN_WIDTH );
+//IE_CORE_FORWARDDECLARE( Scene );
 }
 
-float ieFilterWidth( point x )
+namespace IECoreMaya
 {
-	return max( sqrt( area( x ) ), IECORERI_FILTER_MIN_WIDTH );
-}
 
-float ieFilteredAbs( float x, fw )
+/// The ProceduralHolderComponentBoundIterator allows maya to iterate over the bounding box corners of
+/// the ProceduralHolder components. It's currently used so you can frame procedural holder components
+/// in the maya viewport.
+class ProceduralHolderComponentBoundIterator : public MPxGeometryIterator
 {
-	float integral( float t )
-	{
-		return sign(t) * 0.5 * t*t ;
-	}
+
+	public:
+
+		ProceduralHolderComponentBoundIterator( void *userGeometry, MObjectArray &components );
+		ProceduralHolderComponentBoundIterator( void *userGeometry, MObject &components );
+		~ProceduralHolderComponentBoundIterator();
+		
+		virtual bool isDone() const;
+		virtual void next();
+		virtual void reset();
+		virtual void component( MObject &component );
+		virtual bool hasPoints() const;
+		virtual int iteratorCount() const;
+		virtual MPoint point() const;
+		virtual void setPoint(const MPoint &) const;
+		virtual int setPointGetNext(MPoint &);
+		virtual int index() const;
+		virtual bool hasNormals() const;
+		virtual int indexUnsimplified() const;
+		
+	private:
+		
+		void computeNumComponents();
+		
+		ProceduralHolder* m_proceduralHolder;
+		unsigned m_idx;
+		MObjectArray m_components;
+		unsigned m_numComponents;
 	
-	float x0 = x - 0.5*fw;
-	float x1 = x0 + fw;
-	return ( integral( x1 ) - integral( x0 ) ) / fw;
-}
+};
 
-#endif // IECORERI_FILTER_H
+} // namespace IECoreMaya
+
+#endif // IECOREMAYA_PROCEDURALHOLDERCOMPONENTBOUNDITERATOR_H

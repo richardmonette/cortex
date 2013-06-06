@@ -993,7 +993,6 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	subSceneInterface->path( pathName );
 	std::string pathStr = relativePathName( pathName );
 	renderer->setAttribute( "name", new StringData( pathStr ) );
-	
 	// Need to add this attribute block to get a parent group with that name that includes the object and/or bound
 	AttributeBlock aNew(renderer);
 
@@ -1007,17 +1006,17 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	M44f transform;
 	transform.setValue( transformd );
 	renderer->setTransform( transform );
-	
+
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
 		ObjectPtr object = subSceneInterface->readObject( time );
-		VisibleRenderable *vis = runTimeCast< VisibleRenderable >(object.get());
-		if( vis )
+		Renderable *o = runTimeCast< Renderable >(object.get());
+		if( o )
 		{
-			vis->render(renderer);
+			o->render(renderer);
 		}
 	}
-	
+
 	if( drawBounds && pathStr != "/" )
 	{
 		AttributeBlock aBox(renderer);
@@ -1059,9 +1058,11 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
-		
+
 		IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 		renderer->setOption( "gl:mode", new StringData( "deferred" ) );
+		// Always draw locators. They can be hidden by using tags.
+		renderer->setOption( "gl:drawCoordinateSystems", new BoolData( true ) );
 		
 		renderer->worldBegin();
 		{
@@ -1125,7 +1126,7 @@ void SceneShapeInterface::setDirty()
 	m_previewSceneDirty = true;
 }
 
-IECoreGL::GroupPtr SceneShapeInterface::glGroup( std::string name )
+IECoreGL::GroupPtr SceneShapeInterface::glGroup( const IECore::InternedString &name )
 {
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
@@ -1138,7 +1139,7 @@ IECoreGL::GroupPtr SceneShapeInterface::glGroup( std::string name )
 	}
 }
 
-int SceneShapeInterface::selectionIndex( std::string name )
+int SceneShapeInterface::selectionIndex( const IECore::InternedString &name )
 {
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
@@ -1151,12 +1152,12 @@ int SceneShapeInterface::selectionIndex( std::string name )
 	}
 }
 
-std::string SceneShapeInterface::selectionName( int index )
+IECore::InternedString SceneShapeInterface::selectionName( int index )
 {
 	return m_indexToNameMap[index];
 }
 
-const std::vector< InternedString > & SceneShapeInterface::childrenNames() const
+const std::vector< InternedString > & SceneShapeInterface::componentNames() const
 {
 	return m_indexToNameMap;
 }

@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +33,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORERI_DYNAMICLOADPROCEDURAL_H
-#define IECORERI_DYNAMICLOADPROCEDURAL_H
-
-#include "IECore/Renderer.h"
+#ifndef IE_CORERI_CORE_H
+#define IE_CORERI_CORE_H
 
 namespace IECoreRI
 {
 
-class DynamicLoadProcedural : public IECore::Renderer::Procedural
-{
+/// Returns true if IECoreRI was built against a renderer API with the RiProceduralV function
+bool withRiProceduralV();
 
-	public :
+}
 
-		DynamicLoadProcedural( const Imath::Box3f &bound, const std::string &dsoName, const std::string &dsoData );
-		virtual ~DynamicLoadProcedural();
-
-		virtual Imath::Box3f bound();
-		virtual void render( IECore::RendererPtr renderer );
-
-	private :
-
-		Imath::Box3f m_bound;
-		std::string m_dsoName;
-		std::string m_dsoData;
-
-};
-
-} // namespace IECoreRI
-
-#endif // IECORERI_DYNAMICLOADPROCEDURAL_H
+#endif // IE_CORERI_CORE_H

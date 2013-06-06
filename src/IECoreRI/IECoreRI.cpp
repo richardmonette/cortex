@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +33,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORERI_FILTER_H
-#define IECORERI_FILTER_H
+#include "IECoreRI/IECoreRI.h"
 
-#define IECORERI_FILTER_MIN_WIDTH 1.0e-6
-
-float ieFilterWidth( float x )
+namespace IECoreRI
 {
-	extern float du;
-	extern float dv;
-	return max( abs( Du( x ) * du ) + abs( Dv( x ) * du ), IECORERI_FILTER_MIN_WIDTH );
+
+bool withRiProceduralV()
+{
+#ifdef IECORERI_WITH_PROCEDURALV
+	return true;
+#else
+	return false;
+#endif
 }
 
-float ieFilterWidth( point x )
-{
-	return max( sqrt( area( x ) ), IECORERI_FILTER_MIN_WIDTH );
 }
-
-float ieFilteredAbs( float x, fw )
-{
-	float integral( float t )
-	{
-		return sign(t) * 0.5 * t*t ;
-	}
-	
-	float x0 = x - 0.5*fw;
-	float x1 = x0 + fw;
-	return ( integral( x1 ) - integral( x0 ) ) / fw;
-}
-
-#endif // IECORERI_FILTER_H

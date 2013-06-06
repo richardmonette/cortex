@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <string.h>
+
 #include "tbb/spin_rw_mutex.h"
 
 #include "boost/multi_index_container.hpp"
@@ -114,6 +116,12 @@ static InternedString g_emptyString("");
 const InternedString &InternedString::emptyString()
 {
 	return g_emptyString;
+}
+
+std::ostream &operator << ( std::ostream &o, const InternedString &str )
+{
+	o << str.c_str();
+	return o;
 }
 
 } // namespace IECore
