@@ -275,6 +275,12 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 
 void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) const
 {
+	if( !m_memberData->points->readable().size() )
+	{
+		// early out if no points - some drivers crash otherwise
+		return;
+	}
+
 	/*if( depthSortRequested( state ) )
 	{
 		depthSort();
@@ -305,7 +311,7 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 
 void PointsPrimitive::renderInstances( size_t numInstances ) const
 {
-	glDrawArraysInstanced( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
+	glDrawArraysInstancedARB( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );
 }
 
 Imath::Box3f PointsPrimitive::bound() const
@@ -361,16 +367,18 @@ std::string &PointsPrimitive::instancingVertexSource()
 	static std::string s = 
 	
 		"#include \"IECoreGL/PointsPrimitive.h\"\n"
+		"#include \"IECoreGL/VertexShader.h\"\n"
 		""
 		"IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS\n"
 		""
-		"in vec3 instanceP;"
-		"in vec3 instanceN;"
-		"in vec2 instancest;"
+		"IECOREGL_VERTEXSHADER_IN vec3 instanceP;"
+		"IECOREGL_VERTEXSHADER_IN vec3 instanceN;"
+		"IECOREGL_VERTEXSHADER_IN vec2 instancest;"
 		""
-		"varying out vec3 fragmentI;"
-		"varying out vec3 fragmentN;"
-		"varying out vec2 fragmentst;"
+		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentI;"
+		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentN;"
+		"IECOREGL_VERTEXSHADER_OUT vec2 fragmentst;"
+		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentCs;"
 		""
 		"void main()"
 		"{"
@@ -391,6 +399,7 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"	}"
 		""
 		"	fragmentst = instancest;"
+		"	fragmentCs = vec3( 1.0, 1.0, 1.0 );" /// \todo GET IT FROM SOMEWHERE
 		"}";
 		
 	return s;
