@@ -152,7 +152,7 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 
 void MeshPrimitive::renderInstances( size_t numInstances ) const
 {
-	unsigned vertexCount = m_vertIds->readable().size();
+	unsigned vertexCount = m_memberData->vertIds->readable().size();
 	glDrawArraysInstancedARB( GL_TRIANGLES, 0, vertexCount, numInstances );
 }
 

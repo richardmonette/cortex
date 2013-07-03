@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2013, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,56 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_LOOKUP_H
-#define IECORE_LOOKUP_H
+#ifndef IECOREGL_FRAGMENTSHADER_H
+#define IECOREGL_FRAGMENTSHADER_H
 
-#include <vector>
+#if __VERSION__ <= 120
+#define IECOREGL_FRAGMENTSHADER_IN varying
+#else
+#define IECOREGL_FRAGMENTSHADER_IN in
+#endif
 
-#include "boost/function.hpp"
-
-#include "OpenEXR/ImathColor.h"
-
-namespace IECore
-{
-
-/// The Lookup class takes a function over a one dimensional domain and
-/// accelerates its computation using linear interpolation between precomputed
-/// values stored in a table.
-/// \ingroup mathGroup
-template<typename X, typename Y>
-class Lookup
-{
-	
-	public :
-	
-		typedef X XType;
-		typedef Y YType;
-		typedef boost::function<Y ( X )> Function;
-	
-		Lookup();
-		Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples );
-
-		void init( const Function &function, XType xMin, XType xMax, unsigned numSamples );
-		
-		inline Y operator() ( X x ) const;
-		
-	private :
-	
-		std::vector<Y> m_values;
-		XType m_xMin;
-		XType m_xMax;
-		XType m_xMult;
-				
-};
-
-typedef Lookup<float, float> Lookupff;
-typedef Lookup<double, double> Lookupdd;
-
-typedef Lookup<float, Imath::Color3f> LookupfColor3f;
-typedef Lookup<float, Imath::Color4f> LookupfColor4f;
-
-} // namespace IECore
-
-#include "IECore/Lookup.inl"
-
-#endif // IECORE_LOOKUP_H
+#endif // IECOREGL_FRAGMENTSHADER_H

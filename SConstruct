@@ -309,6 +309,37 @@ o.Add(
 	"/usr/fl/truelight"
 )
 
+# OpenGL options
+
+try :
+	o.Add(
+		BoolVariable( "WITH_GL", "Set this to build the IECoreGL library.", False ),
+	)
+except NameError :
+	# fallback for old scons versions
+	o.Add(
+		BoolOption( "WITH_GL", "Set this to build the IECoreGL library.", False ),
+	)
+
+o.Add(
+	"GLEW_INCLUDE_PATH",
+	"The path to the directory with glew.h in it.",
+	"/usr/local/include/GL",
+)
+
+o.Add(
+	"GLEW_LIB_PATH",
+	"The path to the directory with libGLEW in it.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"GLEW_LIB_SUFFIX",
+	"The suffix appended to the names of the GLEW library. You can modify this "
+	"to link against libraries installed with non-defalt names.",
+	"",
+)
+
 # Maya options
 
 o.Add(
@@ -1762,7 +1793,7 @@ if doConfigure :
 		riTestEnv.Alias( "testRI", riTest )
 
 ###########################################################################################
-# Build, install and test the CoreGL library and bindings
+# Build, install and test the optional CoreGL library and bindings
 ###########################################################################################
 
 if env["WITH_GL"] and doConfigure :
@@ -1798,6 +1829,23 @@ if env["WITH_GL"] and doConfigure :
 	else :
 	
 		c.Finish()
+
+		# we can't add this earlier as then it's built during the configure stage, and that's no good
+		glEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+	
+		if env["PLATFORM"]=="darwin" :
+			glEnv.Append(
+				FRAMEWORKS = [
+					"OpenGL",
+				]
+			)
+		else :
+			glEnv.Append(
+				LIBS = [
+					"GL",
+					"GLU",
+				]
+			)
 
 		glSources = sorted( glob.glob( "src/IECoreGL/*.cpp" ) )
 		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
@@ -1846,24 +1894,30 @@ if env["WITH_GL"] and doConfigure :
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
 		glPythonModuleEnv.Depends( glPythonModule, glLibrary )
 
-if coreEnv["INSTALL_COREGL_POST_COMMAND"]!="" :
-	# this is the only way we could find to get a post action to run for an alias
-	glPythonModuleEnv.Alias( "install", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
-	glPythonModuleEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+		glPythonScripts = glob.glob( "python/IECoreGL/*.py" )
+		glPythonModuleInstall = glPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )		
+		glPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonModuleEnv, glPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		glPythonModuleEnv.Alias( "install", glPythonModuleInstall )
+		glPythonModuleEnv.Alias( "installGL", glPythonModuleInstall )
 
-Default( [ glLibrary, glPythonModule ] )
+		if coreEnv["INSTALL_COREGL_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			glPythonModuleEnv.Alias( "install", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
+			glPythonModuleEnv.Alias( "installGL", glPythonModuleInstall, "$INSTALL_COREGL_POST_COMMAND" ) 
 
-glTestEnv = testEnv.Clone()
-glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
-for e in ["DISPLAY", "XAUTHORITY"] :
-	if e in os.environ :
-		glTestEnv["ENV"][e] = os.environ[e]
+		Default( [ glLibrary, glPythonModule ] )
 
-glTest = glTestEnv.Command( "test/IECoreGL/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT --verbose" )
-NoCache( glTest )
-glTestEnv.Depends( glTest, corePythonModule )
-glTestEnv.Depends( glTest, glob.glob( "test/IECoreGL/*.py" ) )
-glTestEnv.Alias( "testGL", glTest )
+		glTestEnv = testEnv.Clone()
+		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
+		for e in ["DISPLAY", "XAUTHORITY"] :
+			if e in os.environ :
+				glTestEnv["ENV"][e] = os.environ[e]
+		
+		glTest = glTestEnv.Command( "test/IECoreGL/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT --verbose" )
+		NoCache( glTest )
+		glTestEnv.Depends( glTest, corePythonModule )
+		glTestEnv.Depends( glTest, glob.glob( "test/IECoreGL/*.py" ) )
+		glTestEnv.Alias( "testGL", glTest )
 		
 ###########################################################################################
 # Build, install and test the coreMaya library and bindings
@@ -1874,7 +1928,6 @@ mayaEnvSets = {
 }
 
 mayaEnvAppends = {
-
 	"CXXFLAGS" : [
 		"-isystem", "$GLEW_INCLUDE_PATH",
 	],
@@ -2086,7 +2139,8 @@ if doConfigure :
 		mayaPythonTestEnv.Depends( mayaPythonTest, glob.glob( "python/IECoreMaya/*.py" ) )
 		if env["WITH_MAYA_PLUGIN_LOADER"] :
 			mayaPythonTestEnv.Depends( mayaPythonTest, mayaPluginLoader )
-		mayaPythonTestEnv.Depends( mayaPythonTest, [ glLibrary, glPythonModule ] )
+		if env["WITH_GL"] :
+			mayaPythonTestEnv.Depends( mayaPythonTest, [ glLibrary, glPythonModule ] )
 		mayaPythonTestEnv.Alias( "testMaya", mayaPythonTest )			
 		mayaPythonTestEnv.Alias( "testMayaPython", mayaPythonTest )			
 
@@ -2108,6 +2162,10 @@ nukeEnvAppends = {
 	"LIBPATH" : [
 		"$NUKE_ROOT",
 	],
+
+	"LIBS" : [
+		"GLEW$GLEW_LIB_SUFFIX",
+	]
 
 }
 
@@ -2321,6 +2379,7 @@ houdiniEnvAppends = {
 	],
 	"LIBPATH" : [
 		"$HOUDINI_LIB_PATH",
+		"$GLEW_LIB_PATH",
 	],
 	"LIBS" : [
 		"HoudiniUI",
@@ -2334,6 +2393,7 @@ houdiniEnvAppends = {
 		"HoudiniUT",
 		"HoudiniRAY",
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
+		"GLEW$GLEW_LIB_SUFFIX"
 	]
 }
 
@@ -2591,7 +2651,8 @@ if doConfigure :
 			mantraTestEnv.Depends( mantraPythonTest, [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
 			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/test/IECoreMantra/*.py" ) )
 			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" ) )
-			mantraTestEnv.Depends( mantraPythonTest, [ glLibrary, glPythonModule ] )
+			if env["WITH_GL"] :
+				mantraTestEnv.Depends( mantraPythonTest, [ glLibrary, glPythonModule ] )
 			mantraTestEnv.Alias( "testMantra", mantraPythonTest )
 			mantraTestEnv.Alias( "testMantraPython", mantraPythonTest )
 
@@ -2653,10 +2714,12 @@ if doConfigure :
 		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "test/IECoreHoudini/*.py" ) )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "python/IECoreHoudini/*.py" ) )
-		houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
+		if env["WITH_GL"] :
+			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
 		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
 		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
 		
+
 ###########################################################################################
 # Build and install the coreTruelight library and headers
 ###########################################################################################

@@ -1,0 +1,4 @@
+* sort our IDSelect properly
+* fix testOcclusionQuerySelect
+	- i think it's because there's no current framebuffer
+
