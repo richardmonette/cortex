@@ -222,7 +222,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		sceneFile = maya.cmds.getAttr( node+".file" )
 		sceneRoot = maya.cmds.getAttr( node+".root" )
-		
+
 		maya.cmds.setAttr( node+".querySpace", 1 )
 		maya.cmds.setAttr( node+".objectOnly", l=False )
 		maya.cmds.setAttr( node+".objectOnly", 1 )
@@ -232,6 +232,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		drawChildBounds = maya.cmds.getAttr( node+".drawChildBounds" )
 		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
 		drawTagsFilter = maya.cmds.getAttr( node+".drawTagsFilter" )
+		
+		timeConnection = maya.cmds.listConnections( node+".time", source = True, destination = False, plugs=True )
 		
 		newSceneShapeFns = []
 
@@ -264,7 +266,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
 			maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
 			maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
-			
+
 			if drawTagsFilter:
 				parentTags = drawTagsFilter.split()
 				childTags = fnChild.sceneInterface().readTags()
@@ -273,8 +275,11 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 					# Hide that child since it doesn't match any filter
 					maya.cmds.setAttr( childTransform+".visibility", 0 )
 				else:
-					maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )	
+					maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )
 			
+			# Connect child time to its parent so they're in sync
+			maya.cmds.connectAttr( node+".time", childNode+".time", f=True )
+
 			if maya.cmds.listRelatives( childTransform, parent = True, f=True ) != [ transform ]:
 				maya.cmds.parent( childTransform, transform, relative=True )
 			
@@ -306,7 +311,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		allTransformChildren = maya.cmds.listRelatives( transform, f=True, type = "transform" ) or []
 		
 		for child in allTransformChildren:
-			# Do a bunch of tests first!
+			# \todo check for connections and new parented nodes
 			maya.cmds.delete( child )
 		
 		maya.cmds.setAttr( node+".objectOnly", l=False )

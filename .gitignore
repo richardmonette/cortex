@@ -1,97 +1,29 @@
-*.so
-*.dylib
+*.*~
+*.tmp
+*.swp
 *.os
+*.so
+*.o
 *.pyc
-
-# /
-
-/.sconsign.dblite
-/config.log
-/.sconf_temp
-/plugins
-/lib
-/.cproject
-/.project
-/.pydevproject
-/build
-/.settings
-/env.tcsh
-/gaffer.options
-
-# /config/ie/
-/config/ie/.sconsign*
-
-# /contrib/IECoreMantra/
-/contrib/IECoreMantra/plugins
-
-# /contrib/IECoreMantra/test/IECoreMantra/
-/contrib/IECoreMantra/test/IECoreMantra/results.txt
-
-# /doc/
-/doc/html
-/doc/python
-
-# /scripts/
-/scripts/do
-
-# /test/
-/test/IECoreTest
-
-# /test/IECore/
-/test/IECore/results.txt
-/test/IECore/resultsPython.txt
-/test/IECore/IECoreTest
-
-# /test/IECore/data/
-/test/IECore/data/*testoutput*
-
-# /test/IECore/data/cinFiles/
-/test/IECore/data/cinFiles/*testoutput*
-
-# /test/IECore/data/cobFiles/
-/test/IECore/data/cobFiles/*testoutput*
-
-# /test/IECore/data/dpx/
-/test/IECore/data/dpx/*testoutput*
-
-# /test/IECore/data/exrFiles/
-/test/IECore/data/exrFiles/*testoutput*
-
-# /test/IECore/data/fioFiles/
-/test/IECore/data/fioFiles/*testoutput*
-
-# /test/IECore/data/jpg/
-/test/IECore/data/jpg/*testoutput*
-
-# /test/IECore/data/nukeScripts/
-/test/IECore/data/nukeScripts/*testoutput*
-
-# /test/IECore/data/obj/
-/test/IECore/data/obj/*testoutput*
-
-# /test/IECore/data/pdcFiles/
-/test/IECore/data/pdcFiles/*testoutput*
-
-# /test/IECore/data/ribFiles/
-/test/IECore/data/ribFiles/*testoutput*
-
-# /test/IECore/data/tiff/
-/test/IECore/data/tiff/*testoutput*
-
-# /test/IECoreHoudini/
-/test/IECoreHoudini/resultsPython.txt
-
-# /test/IECoreMaya/
-/test/IECoreMaya/results.txt
-/test/IECoreMaya/resultsPython.txt
-/test/IECoreMaya/IECoreMayaTest
-
-# /test/IECoreNuke/
-/test/IECoreNuke/resultsPython.txt
-
-# /test/IECoreRI/
-/test/IECoreRI/results.txt
-/test/IECoreRI/resultsPython.txt
-
-# /test/IECoreTruelight/
-/test/IECoreTruelight/resultsPython.txt
+*.dylib
+.sconsign.dblite
+.sconf_temp
+.cproject
+.project
+.pydevproject
+.settings
+.flexlmrc
+doc/html
+doc/python
+plugins
+lib
+build
+config.log
+mayaLog
+test/IECore/IECoreTest
+test/IECore/results.txt
+test/IECore/resultsPython.txt
+test/IECoreRI/resultsPython.txt
+test/IECoreMaya/resultsPython.txt
+test/IECoreNuke/resultsPython.txt
+test/IECoreHoudini/resultsPython.txt

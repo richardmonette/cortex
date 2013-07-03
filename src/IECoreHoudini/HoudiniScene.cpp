@@ -268,15 +268,35 @@ void HoudiniScene::writeTransform( const Data *transform, double time )
 
 bool HoudiniScene::hasAttribute( const Name &name ) const
 {
+	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_has( retrieveNode() );
+	}
+	
 	return false;
 }
 
 void HoudiniScene::attributeNames( NameList &attrs ) const
 {
+	attrs.clear();
+	for ( std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); ++it )
+	{
+		if ( it->second.m_has( retrieveNode() ) )
+		{
+			attrs.push_back( it->first );
+		}
+	}
 }
 
 ObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
 {
+	std::map<Name, CustomReader>::const_iterator it = customAttributeReaders().find( name );
+	if ( it != customAttributeReaders().end() )
+	{
+		return it->second.m_read( retrieveNode() );
+	}
+	
 	return 0;
 }
 
@@ -287,12 +307,44 @@ void HoudiniScene::writeAttribute( const Name &name, const Object *attribute, do
 
 bool HoudiniScene::hasTag( const Name &name ) const
 {
-	throw Exception( "HoudiniScene::hasTag not supported" );
+	const OP_Node *node = retrieveNode();
+	if ( !node )
+	{
+		return false;
+	}
+	
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
+	{
+		if ( it->m_has( node, name ) )
+		{
+			return true;
+		}
+	}
+	
+	return false;
 }
 
 void HoudiniScene::readTags( NameList &tags, bool includeChildren ) const
 {
-	throw Exception( "HoudiniScene::readTags not supported" );
+	tags.clear();
+	
+	const OP_Node *node = retrieveNode();
+	if ( !node )
+	{
+		return;
+	}
+	
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
+	{
+		NameList values;
+		it->m_read( node, values, includeChildren );
+		for ( NameList::iterator vIt = values.begin(); vIt != values.end(); ++vIt )
+		{
+			tags.push_back( *vIt );
+		}
+	}
 }
 
 void HoudiniScene::writeTags( const NameList &tags )
@@ -752,4 +804,32 @@ bool HoudiniScene::relativePath( const char *value, Path &result ) const
 	}
 	
 	return true;
+}
+
+void HoudiniScene::registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn )
+{
+	CustomReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customAttributeReaders()[attrName] = r;
+}
+
+std::map<SceneInterface::Name, HoudiniScene::CustomReader> &HoudiniScene::customAttributeReaders()
+{
+	static std::map<SceneInterface::Name, HoudiniScene::CustomReader> readers;
+	return readers;
+}
+
+void HoudiniScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
+{
+	CustomTagReader r;
+	r.m_has = hasFn;
+	r.m_read = readFn;
+	customTagReaders().push_back( r );
+}
+
+std::vector<HoudiniScene::CustomTagReader> &HoudiniScene::customTagReaders()
+{
+	static std::vector<HoudiniScene::CustomTagReader> readers;
+	return readers;
 }
