@@ -107,7 +107,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 {
-	IECore::MessageHandler::Scope handlerScope( messageHandler() );
+	IECore::MessageHandler::Scope handlerScope( getMessageHandler() );
 	
 	// some defaults and useful variables
 	float now = context.getTime();
@@ -136,11 +136,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	boss->opStart("Building ProceduralHolder Geometry...");
 	gdp->clearAndDestroy();
 	
-	// push the input geo into the associated procedural parameters
-	setInputParameterValues( now );
-	
-	// update the SOP parameters to match the procedural parameters
-	updateParameter( procedural->parameters(), now, "", true );
+	setParameterisedValues( now );
 	
 	try
 	{

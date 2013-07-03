@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "SOP/SOP_Node.h"
+#include "OP/OP_Node.h"
 
 #include "IECoreHoudini/FnParameterisedHolder.h"
 #include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
@@ -45,10 +45,11 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindFnParameterisedHolder()
 {
 	class_<FnParameterisedHolder>( "_FnParameterisedHolder" )
-		.def( init<SOP_Node*>() )
+		.def( init<OP_Node*>() )
 		.def( "hasParameterised", &FnParameterisedHolder::hasParameterised )
 		.def( "setParameterised", (void (FnParameterisedHolder::*)( IECore::RunTimeTypedPtr ))&FnParameterisedHolder::setParameterised )
 		.def( "setParameterised", (void (FnParameterisedHolder::*)( const std::string &, int, const std::string & ))&FnParameterisedHolder::setParameterised )
 		.def( "getParameterised", &FnParameterisedHolder::getParameterised )
+		.def( "setParameterisedValues", &FnParameterisedHolder::setParameterisedValues )
 	;
 }

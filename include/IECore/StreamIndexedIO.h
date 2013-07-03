@@ -38,7 +38,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
-#include "tbb/mutex.h"
+#include "tbb/recursive_mutex.h"
 #include "boost/optional.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 
@@ -56,7 +56,7 @@ class StreamIndexedIO : public IndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( StreamIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( StreamIndexedIO, IndexedIO );
 
 		virtual ~StreamIndexedIO();
 
@@ -78,6 +78,8 @@ class StreamIndexedIO : public IndexedIO
 
 		IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const;
 
+		IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name );
+
 		void remove( const IndexedIO::EntryID &name );
 
 		void removeAll();
@@ -89,6 +91,8 @@ class StreamIndexedIO : public IndexedIO
 		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
 
 		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
+
+		void commit();
 
 		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
@@ -102,6 +106,7 @@ class StreamIndexedIO : public IndexedIO
 		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength);
 		void write(const IndexedIO::EntryID &name, const float &x);
 		void write(const IndexedIO::EntryID &name, const double &x);
 		void write(const IndexedIO::EntryID &name, const half &x);
@@ -114,7 +119,6 @@ class StreamIndexedIO : public IndexedIO
 		void write(const IndexedIO::EntryID &name, const unsigned char &x);
 		void write(const IndexedIO::EntryID &name, const short &x);
 		void write(const IndexedIO::EntryID &name, const unsigned short &x);
-		void write(const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &x);
 
 		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const;
@@ -128,6 +132,7 @@ class StreamIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const;
+		void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const;
 		void read(const IndexedIO::EntryID &name, float &x) const;
 		void read(const IndexedIO::EntryID &name, double &x) const;
 		void read(const IndexedIO::EntryID &name, half &x) const;
@@ -140,7 +145,6 @@ class StreamIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, unsigned char &x) const;
 		void read(const IndexedIO::EntryID &name, short &x) const;
 		void read(const IndexedIO::EntryID &name, unsigned short &x) const;
-		void read(const IndexedIO::EntryID &name, IndexedIO::EntryIDList &x) const;
 
 	protected:
 
@@ -152,7 +156,7 @@ class StreamIndexedIO : public IndexedIO
 
 		class StringCache;
 
-		/// Class that provides access to the stream file and also keep a reference to the index of the file.
+		/// Class that provides access to the stream file.
 		class StreamFile : public RefCounted
 		{
 			public:
@@ -165,14 +169,18 @@ class StreamIndexedIO : public IndexedIO
 				Imf::Int64 tellg();
 				Imf::Int64 tellp();
 
-				Index* index() const;
+				IndexedIO::OpenMode openMode() const;
 
 				// returns a read lock, when thread-safety is required.
-				typedef tbb::mutex::scoped_lock MutexLock;
-				tbb::mutex & mutex();
+				typedef tbb::recursive_mutex Mutex;
+				typedef Mutex::scoped_lock MutexLock;
+				Mutex & mutex();
 
 				// utility function that returns a temporary buffer for io operations (not thread safe).
 				char *ioBuffer( unsigned long size );
+
+				/// called after the main index is saved to disk, ready to close the file.
+				virtual void flush( size_t endPosition );
 
 				static bool canRead( std::iostream &stream );
 
@@ -183,14 +191,9 @@ class StreamIndexedIO : public IndexedIO
 				// This function allocates and if in read-mode also reads the Index of the file.
 				void setStream( std::iostream *stream, bool emptyFile );
 
-				/// Saves to the file changes to the index. This function is used by the destructor.
-				/// If the index has changed, than it returns the offset where the file ends.
-				boost::optional<Imf::Int64> flush();
-
 				IndexedIO::OpenMode m_openmode;
-				IndexPtr m_index;
 				std::iostream *m_stream;
-				tbb::mutex m_mutex;
+				Mutex m_mutex;
 
 				unsigned long m_ioBufferLen;
 				char *m_ioBuffer;
@@ -200,11 +203,11 @@ class StreamIndexedIO : public IndexedIO
 		/// Create an instance with unnitialized state. Must call open() method.
 		StreamIndexedIO();
 
-		/// Copy constructor used when duplicating the file
-		StreamIndexedIO( const StreamIndexedIO *other );
+		/// Constructor based on the node
+		StreamIndexedIO( Node &node );
 
 		/// Opens a file using the given IndexedFile accessor
-		void open( StreamFilePtr file, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode );
+		void open( StreamFilePtr file, const IndexedIO::EntryIDList &root );
 
 		/// Variant of "removeChild" which allows exceptions to be optionally thrown
 		/// if the entry to remove does not exist.
@@ -244,14 +247,15 @@ class StreamIndexedIO : public IndexedIO
 
 		// Duplicates this object by mapping it to a different root node. Used when the subdirectory functions are called.
 		// This function does not duplicate the file handle like the public duplicate does. It works with any openMode.
-		virtual IndexedIO *duplicate(Node *rootNode) const = 0;
+		virtual IndexedIO *duplicate(Node &rootNode) const = 0;
 
-		/// The mode this device was opened with
-		IndexedIO::OpenMode m_mode;
+		/// forces writing the index to the file and preventing any further changes.
+		/// this function can be called by derived classes (MemoryIndexedIO).
+		void flush();
 
-		StreamFilePtr m_streamFile;
+		StreamFile &streamFile() const;
 
-		Node * m_node;
+		NodePtr m_node;
 
 	private :
 

@@ -46,7 +46,7 @@ class FileIndexedIO : public StreamIndexedIO
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( FileIndexedIO );
+		IE_CORE_DECLARERUNTIMETYPED( FileIndexedIO, StreamIndexedIO );
 
 		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
@@ -57,14 +57,17 @@ class FileIndexedIO : public StreamIndexedIO
 
 		virtual ~FileIndexedIO();
 
+		/// Returns the full file name accessed by this object.
+		const std::string &fileName() const;
+
 	protected:
 
 		FileIndexedIO();
 
-		FileIndexedIO( const FileIndexedIO *other );
+		FileIndexedIO( StreamIndexedIO::Node &rootNode );
 
 		// duplicates this object by mapping it to a different root node.
-		IndexedIO *duplicate(StreamIndexedIO::Node *rootNode) const;
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
 
 		class StreamFile;
 };

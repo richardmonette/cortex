@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,9 +42,12 @@
 
 using namespace IECore;
 
+IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( IndexedIO )
+
 namespace fs = boost::filesystem;
 
-IndexedIO::EntryIDList IndexedIO::rootPath;
+const IndexedIO::EntryID IndexedIO::rootName("/");
+const IndexedIO::EntryIDList IndexedIO::rootPath;
 
 IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode )
 {
@@ -138,7 +141,9 @@ void IndexedIO::validateOpenMode(IndexedIO::OpenMode &mode)
 // Entry
 //
 
-IndexedIO::Entry::Entry() : m_ID(""), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
+static InternedString emptyString("");
+
+IndexedIO::Entry::Entry() : m_ID(emptyString), m_entryType( IndexedIO::Directory), m_dataType( IndexedIO::Invalid), m_arrayLength(0)
 {
 }
 
@@ -189,7 +194,7 @@ bool IndexedIO::Entry::isArray( IndexedIO::DataType dType )
 		case IndexedIO::UShortArray:
 		case IndexedIO::Int64Array:
 		case IndexedIO::UInt64Array:
-		case IndexedIO::SymbolicLink:
+		case IndexedIO::InternedStringArray:
 			return true;
 		default:
 			return false;

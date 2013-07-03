@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -114,6 +114,9 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
+		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
+		virtual void editEnd();
+
 	private :
 
 		// Does things common to both constructors
@@ -155,6 +158,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getResolutionOption( const std::string &name ) const;
 		IECore::ConstDataPtr getRxOption( const char *name ) const;
 
+		IECore::CompoundDataPtr m_options;
 		IECore::CameraPtr m_camera;
 		void outputCamera( IECore::CameraPtr camera );
 
@@ -194,12 +198,25 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getDoubleSidedAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getRightHandedOrientationAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
-
+		
+		/// ProceduralData used to contain a smart pointer to the RendererImplementation which created it.
+		/// This normally works fine, as 3delight typically calls procFree() immediately after procSubdivide(),
+		/// meaning there are no extra references to the top level RendererImplementation lying around and it dies
+		/// when it's supposed to. Unfortunately, when "ri:hider:editable" is enabled in later versions of 3delight
+		/// (for progressive ipr rendering), calls to procFree() get deferred until RiEnd(). As RiEnd() 
+		/// only gets called when the top level RendererImplementation dies, this makes it impossible to
+		/// stop the progressive render. We get round this by using smart pointers to the shared data and options
+		/// instead.
 		struct ProceduralData
 		{
 			IECore::Renderer::ProceduralPtr procedural;
-			RendererImplementationPtr parentRenderer; // the renderer the procedural call was made to
+			SharedData::Ptr sharedData;
+			IECore::CompoundDataPtr options;
 		};
+		
+		// This constructor is used to create a child renderer in procSubdivide()
+		RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options );
+		
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
 

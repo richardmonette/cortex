@@ -22,40 +22,49 @@ soptoolutils.genericTool(kwargs, 'ieProceduralHolder')]]></script>
   </tool>
 
   <!-- Cortex To Houdini Converter -->
-  <tool name="cortex_to_houdini_converter" label="Cortex To Houdini" icon="SOP_ieToHoudiniConverter">
+  <tool name="cortex_converter" label="Cortex Convert" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>SOP</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
     <script scriptType="python"><![CDATA[import soptoolutils
-soptoolutils.genericTool(kwargs, 'ieToHoudiniConverter')]]></script>
+soptoolutils.genericTool(kwargs, 'ieCortexConverter')]]></script>
   </tool> 
 
-  <!-- ModelCacheSource SOP -->
-  <tool name="cortexModelCacheSource" label="ModelCache Source" icon="SOP_ieToHoudiniConverter">
+  <!-- SceneCacheSource SOP -->
+  <tool name="cortexSceneCacheSource" label="SceneCache Source" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>SOP</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieModelCacheSource')]]></script>
+    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieSceneCacheSource')]]></script>
   </tool>
   
-  <!-- ModelCacheTransform OBJ -->
-  <tool name="cortexModelCacheTransform" label="ModelCache Xform" icon="SOP_ieToHoudiniConverter">
+  <!-- SceneCacheTransform OBJ -->
+  <tool name="cortexSceneCacheTransform" label="SceneCache Xform" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>OBJ</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieModelCacheTransform')]]></script>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheTransform')]]></script>
   </tool>
   
-  <!-- ModelCacheGeometry OBJ -->
-  <tool name="cortexModelCacheGeometry" label="ModelCache GEO" icon="SOP_ieToHoudiniConverter">
+  <!-- SceneCacheGeometry OBJ -->
+  <tool name="cortexSceneCacheGeometry" label="SceneCache GEO" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
       <contextNetType>OBJ</contextNetType>
     </toolMenuContext>
     <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieModelCacheGeometry')]]></script>
+    <script scriptType="python"><![CDATA[import objecttoolutils; objecttoolutils.genericTool(kwargs, 'ieSceneCacheGeometry')]]></script>
+  </tool>
+  
+  <!-- SceneCacheWriter Writer -->
+  <tool name="cortexSceneCacheWriter" label="SceneCache Writer" icon="SOP_ieToHoudiniConverter">
+    <toolMenuContext name="network">
+      <contextNetType>ROP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import drivertoolutils; drivertoolutils.genericTool(kwargs, 'ieSceneCacheWriter')]]></script>
   </tool>
   
   <!-- Interpolated Cache Reader -->

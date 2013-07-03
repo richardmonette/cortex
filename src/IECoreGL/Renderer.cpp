@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2011, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -646,6 +646,7 @@ void IECoreGL::Renderer::worldEnd()
 	}
 	m_data->implementation->worldEnd();
 	m_data->inWorld = false;
+	m_data->cachedConverter->clearUnused();
 }
 
 ScenePtr IECoreGL::Renderer::scene()
@@ -2003,6 +2004,16 @@ IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECo
 	}
 
 	return 0;
+}
+
+void IECoreGL::Renderer::editBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	msg( Msg::Warning, "Renderer::editBegin", "Not implemented" );
+}
+
+void IECoreGL::Renderer::editEnd()
+{
+	msg( Msg::Warning, "Renderer::editEnd", "Not implemented" );
 }
 
 IECoreGL::ShaderLoader *IECoreGL::Renderer::shaderLoader()

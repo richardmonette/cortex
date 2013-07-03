@@ -42,6 +42,7 @@ version = int(procedural.parm(\"__classVersion\").eval())
 
 # create a function set and get our parameterised object
 fn = IECoreHoudini.FnProceduralHolder( procedural )
+fn.setParameterisedValues()
 parameterised = fn.getParameterised()
 
 # get parameters from procedural
@@ -60,5 +61,47 @@ return csv_str" language = python }
 if ch(\"../bboxmode\")==1:
     bboxsop = chsop( \"../boundsop\" )
 return bboxsop" language = python }
+    }
+    channel vmproc_minboundx {
+      lefttype = extend
+      righttype = extend
+      default = -1
+      flags = 0
+      segment { length = 0 value = -1 -1 expr = bbox(chsop(\"vmproc_soppath\"),D_XMIN) }
+    }
+    channel vmproc_minboundy {
+      lefttype = extend
+      righttype = extend
+      default = -1
+      flags = 0
+      segment { length = 0 value = -1 -1 expr = bbox(chsop(\"vmproc_soppath\"),D_YMIN) }
+    }
+    channel vmproc_minboundz {
+      lefttype = extend
+      righttype = extend
+      default = -1
+      flags = 0
+      segment { length = 0 value = -1 -1 expr = bbox(chsop(\"vmproc_soppath\"),D_ZMIN) }
+    }
+    channel vmproc_maxboundx {
+      lefttype = extend
+      righttype = extend
+      default = 1
+      flags = 0
+      segment { length = 0 value = 1 1 expr = bbox(chsop(\"vmproc_soppath\"),D_XMAX) }
+    }
+    channel vmproc_maxboundy {
+      lefttype = extend
+      righttype = extend
+      default = 1
+      flags = 0
+      segment { length = 0 value = 1 1 expr = bbox(chsop(\"vmproc_soppath\"),D_YMAX) }
+    }
+    channel vmproc_maxboundz {
+      lefttype = extend
+      righttype = extend
+      default = 1
+      flags = 0
+      segment { length = 0 value = 1 1 expr = bbox(chsop(\"vmproc_soppath\"),D_ZMAX) }
     }
   }

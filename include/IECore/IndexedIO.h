@@ -42,8 +42,8 @@
 
 #include "OpenEXR/half.h"
 
-#include "IECore/RefCounted.h"
-#include "IECore/Interned.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/InternedString.h"
 
 namespace IECore
 {
@@ -53,10 +53,12 @@ IE_CORE_FORWARDDECLARE( IndexedIO );
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered.
 /// \ingroup ioGroup
-class IndexedIO : public RefCounted
+class IndexedIO : public RunTimeTyped
 {
 	public:
 		
+		IE_CORE_DECLARERUNTIMETYPED( IndexedIO, RunTimeTyped );
+
 		/// General enums and low level structures
 		enum OpenModeFlags
 		{
@@ -106,7 +108,7 @@ class IndexedIO : public RefCounted
 			Int64Array,
 			UInt64,
 			UInt64Array,
-			SymbolicLink	// refers to a EntryIDList
+			InternedStringArray
 		} DataType;
 
 		/// Enum used to specify behavior when querying child directories.
@@ -119,10 +121,10 @@ class IndexedIO : public RefCounted
 		typedef InternedString EntryID;
 		typedef std::vector< EntryID > EntryIDList;
 		class Entry;
+		// singleton representing the root name
+		static const EntryID rootName;
 		// singleton representing the root location (to be passed in the factory function)
-		static EntryIDList rootPath;
-
-		IE_CORE_DECLAREMEMBERPTR( IndexedIO );
+		static const EntryIDList rootPath;
 
 		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const EntryIDList &, IndexedIO::OpenMode );
 
@@ -180,11 +182,22 @@ class IndexedIO : public RefCounted
 		/// Return details of a specific child entry or raises an exception if it doesn't exist.
 		virtual IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const = 0;
 
+		/// Creates a subdirectory and returns a writable interface for it or Throws an exception if the subdirectory already exists.
+		virtual IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name ) = 0;
+
 		/// Remove a specified child file or directory.
+		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after remove is called.
 		virtual void remove( const IndexedIO::EntryID &name ) = 0;
 
 		/// Remove all entries.
+		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after remove is called.
 		virtual void removeAll() = 0;
+
+		/// Commit the contents of the current directory to the file, further changes on this directory or it's subdirectories are not allowed.
+		/// This helps freeing memory and also gives hints to the implementation classes to structure the file format in a sensible way.
+		/// The commit() method is called by Object::save function.
+		/// Any IndexedIO instances to child directories will be in a invalid state and should not be used after commit is called.
+		virtual void commit() = 0;
 
 		/// Returns a new interface for the parent of this node in the file or a NULL pointer if it's the root.
 		virtual IndexedIOPtr parentDirectory() = 0;
@@ -270,6 +283,12 @@ class IndexedIO : public RefCounted
 		/// \param arrayLength The number of elements in the array
 		virtual void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength) = 0;
 
+		/// Create a new file containing the specified InternedString array contents
+		/// \param name The name of the file to be written
+		/// \param x The data to write
+		/// \param arrayLength The number of elements in the array
+		virtual void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength) = 0;
+
 		/// Create a new file containing the specified float
 		/// \param name The name of the file to be written
 		/// \param x The data to write
@@ -329,11 +348,6 @@ class IndexedIO : public RefCounted
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		virtual void write(const IndexedIO::EntryID &name, const unsigned short &x) = 0;
-
-		/// Create a new file containing the specified symbolic link (EntryIDList)
-		/// \param name The name of the file to be written
-		/// \param x The data to write
-		virtual void write(const IndexedIO::EntryID &name, const EntryIDList &x) = 0;
 
 		/// Read a float array from an existing file.
 		/// \param name The name of the file to be read
@@ -407,6 +421,12 @@ class IndexedIO : public RefCounted
 		/// \param arrayLength The number of elements in the array
 		virtual void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const  = 0;
 
+		/// Read an InternedString array from an existing file
+		/// \param name The name of the file to be read
+		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
+		/// \param arrayLength The number of elements in the array
+		virtual void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const  = 0;
+
 		/// Read a float from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x Returns the data read.
@@ -467,11 +487,6 @@ class IndexedIO : public RefCounted
 		/// \param x Returns the data read.
 		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) const  = 0;
 
-		/// Read the symbolic link as a EntryIDList from an existing file
-		/// \param name The name of the file to be read
-		/// \param x Returns the data read.
-		virtual void read(const IndexedIO::EntryID &name, EntryIDList &x) const  = 0;
-
 		/// A representation of a single file/directory
 		class Entry
 		{
@@ -526,7 +541,7 @@ class IndexedIO : public RefCounted
 		// Throw an exception if the entry is not writable
 		virtual void writable(const IndexedIO::EntryID &name) const;
 
-		virtual void validateOpenMode(IndexedIO::OpenMode &mode);
+		static void validateOpenMode(IndexedIO::OpenMode &mode);
 
 	private:
 		/// Register a new subclass that can handle the given extension

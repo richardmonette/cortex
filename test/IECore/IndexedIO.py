@@ -83,7 +83,7 @@ class TestIndexedIO(unittest.TestCase):
 
 class TestMemoryIndexedIO(unittest.TestCase):
 
-	def test(self):
+	def testSaveWriteObjects(self):
 		"""Test MemoryIndexedIO read/write operations."""
 		f = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
@@ -104,7 +104,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
-
+		
 		random.seed( 19 )
 
 		dataPresent = set()
@@ -167,6 +167,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testConstructors(self):
 		"""Test FileIndexedIO constuctors"""
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
+		self.assertEqual( f.fileName() , "./test/FileIndexedIO.fio" )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
 
@@ -183,6 +184,20 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( f.path() , [] )
 		f = None
 		self.assert_( os.path.exists( "./test/FileIndexedIO.fio" ) )
+
+	def testSaveWriteObjects(self):
+		"""Test FileIndexedIO read/write operations."""
+		f = FileIndexedIO( "./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
+		self.assertEqual( f.path() , [] )
+		self.assertEqual( f.currentEntryId() , "/" )
+		txt = StringData("test1")
+		txt.save( f, "obj1" )
+		txt.save( f, "obj2" )
+		del f
+
+		f2 = FileIndexedIO( "./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Read)
+		self.assertEqual( txt, Object.load( f2, "obj1" ) )
+		self.assertEqual( txt, Object.load( f2, "obj2" ) )
 
 	def testResetRoot(self):
 		"""Test FileIndexedIO resetRoot"""
@@ -206,10 +221,11 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( g.path() , [ 'sub1' ] )
 		self.assertEqual( g.currentEntryId() , "sub1" )
 
-		g = f.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
+		g = f.createSubdirectory("sub2" )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( g.path() , [ 'sub2' ] )
 		self.assertEqual( g.currentEntryId() , "sub2" )
+		self.assertRaises( RuntimeError, f.createSubdirectory, "sub2" )
 
 		# test directory
 		h = f.directory(["sub2"], IndexedIO.MissingBehaviour.CreateIfMissing )
@@ -265,6 +281,9 @@ class TestFileIndexedIO(unittest.TestCase):
 		h = e.directory( ["sub2","sub2.1"] )
 		self.assertEqual( h.path(), ["sub2","sub2.1"] )
 		self.assertRaises( RuntimeError, e.directory, [ "i", "dont", "exist" ] )
+		self.assertRaises( RuntimeError, e.subdirectory, "idontexist" )
+		self.assertEqual( None, e.directory( [ "i", "dont", "exist" ], IndexedIO.MissingBehaviour.NullIfMissing ) )
+		self.assertEqual( None, e.subdirectory( "idontexist", IndexedIO.MissingBehaviour.NullIfMissing ) )
 
 	def testLs(self):
 		"""Test FileIndexedIO ls"""
@@ -463,6 +482,28 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		for n in range(0, 1000):
 			self.assertEqual(str(fv[n]), str(gv[n]))
+			
+	def testReadWriteStringVector(self):
+		"""Test FileIndexedIO read/write(InternedStringVector)"""
+
+		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
+		f = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
+
+		fv = InternedStringVectorData()
+
+		for n in range(0, 1000):
+			fv.append(str(n))
+
+		name = "myInternedStringVector"
+		f.write(name, fv)
+
+		gv = f.read(name)
+
+		self.failIf(fv is gv)
+		self.assertEqual(len(fv), len(gv))
+
+		for n in range(0, 1000):
+			self.assertEqual(str(fv[n]), str(gv[n]))		
 
 	def testReadWriteFloat(self):
 		"""Test FileIndexedIO read/write(Float/Double)"""
@@ -514,14 +555,18 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteSymbolicLink(self):
 		"""Test FileIndexedIO read/write(SymbolicLink)"""
 
+		# There isn't actually an explicit symbolic link capability in IndexedIO,
+		# but it's pretty straightforward to emulate it by writing paths
+		# into a file.
+
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		h = g.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
 		
-		fv = h.path()
+		fv = InternedStringVectorData( h.path() )
 
 		name = "myLink"
-		f.write(name, fv)
+		f.write( name, fv )
 
 		gv = f.read(name)
 

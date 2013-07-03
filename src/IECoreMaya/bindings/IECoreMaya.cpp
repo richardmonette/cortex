@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -55,6 +55,7 @@
 #include "IECoreMaya/bindings/FromMayaShapeConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCurveConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaParticleConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaProceduralHolderConverterBinding.h"
 #include "IECoreMaya/bindings/StandaloneBinding.h"
 #include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 #include "IECoreMaya/bindings/TypeIdBinding.h"
@@ -90,6 +91,10 @@
 #include "IECoreMaya/bindings/FromMayaImageConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaStringPlugConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaCameraConverterBinding.h"
+#include "IECoreMaya/bindings/MayaSceneBinding.h"
+#include "IECoreMaya/bindings/FnSceneShapeBinding.h"
+#include "IECoreMaya/bindings/FromMayaLocatorConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaLocatorConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -120,6 +125,7 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaShapeConverter();
 	bindFromMayaCurveConverter();
 	bindFromMayaParticleConverter();
+	bindFromMayaProceduralHolderConverter();
 	bindStandalone();
 	bindMPlugFromPython();
 	bindMObjectFromPython();
@@ -153,4 +159,8 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaImageConverter();
 	bindFromMayaStringPlugConverter();
 	bindToMayaCameraConverter();
+	bindMayaScene();
+	bindFnSceneShape();
+	bindFromMayaLocatorConverter();
+	bindToMayaLocatorConverter();
 }

@@ -45,21 +45,23 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
 
-void bindIndexedIO(const char *bindName);
-void bindFileIndexedIO(const char *bindName);
-void bindMemoryIndexedIO(const char *bindName);
+void bindIndexedIOBase();
+void bindStreamIndexedIO();
+void bindFileIndexedIO();
+void bindMemoryIndexedIO();
 
 void bindIndexedIO()
 {
-	bindIndexedIO("IndexedIO");
-	bindFileIndexedIO("FileIndexedIO");
-	bindMemoryIndexedIO("MemoryIndexedIO");
+	bindIndexedIOBase();
+	bindStreamIndexedIO();
+	bindFileIndexedIO();
+	bindMemoryIndexedIO();
 }
 
 struct IndexedIOHelper
@@ -119,11 +121,6 @@ struct IndexedIOHelper
 		assert(p);
 
 		return p->entry(name);
-	}
-
-	static IndexedIOPtr subdirectory(IndexedIOPtr p, const IndexedIO::EntryID &name)
-	{
-		return p->subdirectory(name);
 	}
 
 	static IndexedIOPtr directory(IndexedIOPtr p, list l, IndexedIO::MissingBehaviour missingBehaviour )
@@ -240,22 +237,19 @@ struct IndexedIOHelper
 				return object( readSingle<unsigned short>(p, name, entry) );
 			case IndexedIO::UShortArray:
 				return object( readArray<unsigned short>(p, name, entry) );
-			case IndexedIO::SymbolicLink:
-				{
-					IndexedIO::EntryIDList path;
-					p->read(name, path);
-					return IndexedIOHelper::entryIDsToList( path );
-				}
+			case IndexedIO::Int64:
+				return object( readSingle<int64_t>(p, name, entry) );
+			case IndexedIO::Int64Array:
+				return object( readArray<int64_t>(p, name, entry) );
+			case IndexedIO::UInt64:
+				return object( readSingle<uint64_t>(p, name, entry) );
+			case IndexedIO::UInt64Array:
+				return object( readArray<uint64_t>(p, name, entry) );		
+			case IndexedIO::InternedStringArray:
+				return object( readArray<InternedString>(p, name, entry) );
 			default:
 				throw IOException(name);
 		}
-	}
-
-	static void writeSymlink(IndexedIOPtr p, const IndexedIO::EntryID &name, list l)
-	{
-		IndexedIO::EntryIDList symLink;
-		IndexedIOHelper::listToEntryIds( l, symLink );
-		p->write( name, symLink );
 	}
 
 	static std::string readString(IndexedIOPtr p, const IndexedIO::EntryID &name)
@@ -281,7 +275,7 @@ struct IndexedIOHelper
 
 };
 
-void bindIndexedIO(const char *bindName)
+void bindIndexedIOBase()
 {
 	IndexedIOPtr (IndexedIO::*nonConstParentDirectory)() = &IndexedIO::parentDirectory;
 	IndexedIOPtr (IndexedIO::*nonConstSubdirectory)(const IndexedIO::EntryID &, IndexedIO::MissingBehaviour) = &IndexedIO::subdirectory;
@@ -299,8 +293,7 @@ void bindIndexedIO(const char *bindName)
 #endif
 
 	// make the indexed io class first
-	IECorePython::RefCountedClass<IndexedIO, RefCounted> indexedIOClass( bindName );
-	
+	IECorePython::RunTimeTypedClass<IndexedIO> indexedIOClass;	
 	{
 		// then define all the nested types
 		
@@ -349,7 +342,7 @@ void bindIndexedIO(const char *bindName)
 			.value("Int64Array", IndexedIO::Int64Array)
 			.value("UInt64", IndexedIO::UInt64)
 			.value("UInt64Array", IndexedIO::UInt64Array)
-			.value("SymbolicLink", IndexedIO::SymbolicLink)
+			.value("InternedStringArray", IndexedIO::InternedStringArray)
 			.export_values()
 		;
 	
@@ -377,8 +370,8 @@ void bindIndexedIO(const char *bindName)
 	indexedIOClass.def("openMode", &IndexedIO::openMode)
 		.def("parentDirectory", nonConstParentDirectory)
 		.def("directory",  &IndexedIOHelper::directory, ( arg( "path" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
-		.def("subdirectory",  &IndexedIOHelper::subdirectory )
-		.def("subdirectory", nonConstSubdirectory )
+		.def("subdirectory", nonConstSubdirectory, ( arg( "name" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
+		.def("createSubdirectory", &IndexedIO::createSubdirectory )
 		.def("path", &IndexedIOHelper::path)
 		.def("remove", &IndexedIO::remove)
 		.def("removeAll", &IndexedIO::removeAll)
@@ -390,11 +383,11 @@ void bindIndexedIO(const char *bindName)
 		.def("write", &IndexedIOHelper::writeVector<std::vector<double> >)
 		.def("write", &IndexedIOHelper::writeVector<std::vector<int> >)
 		.def("write", &IndexedIOHelper::writeVector<std::vector<std::string> >)
+		.def("write", &IndexedIOHelper::writeVector<std::vector<InternedString> >)
 		.def("write", writeFloat)
 		.def("write", writeDouble)
 		.def("write", writeInt)
 		.def("write", writeString)
-		.def("write", &IndexedIOHelper::writeSymlink)
 #if 0
 		// We dont really want to bind these because they don't represent natural Python datatypes
 		.def("write", writeUInt)
@@ -412,11 +405,17 @@ void bindIndexedIO(const char *bindName)
 
 }
 
-void bindFileIndexedIO(const char *bindName)
+void bindStreamIndexedIO()
 {
-	IECorePython::RefCountedClass<FileIndexedIO, IndexedIO>( bindName )
+	IECorePython::RunTimeTypedClass<StreamIndexedIO>();
+}
+
+void bindFileIndexedIO()
+{
+	IECorePython::RunTimeTypedClass<FileIndexedIO>()
 		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<FileIndexedIO, const std::string &> ) )
 		.def("__init__", make_constructor( &IndexedIOHelper::constructor<FileIndexedIO, const std::string &> ) )
+		.def( "fileName", make_function( &FileIndexedIO::fileName, return_value_policy<copy_const_reference>() ) )
 	;
 }
 
@@ -426,9 +425,9 @@ CharVectorDataPtr memoryIndexedIOBufferWrapper( MemoryIndexedIOPtr io )
 	return io->buffer()->copy();
 }
 
-void bindMemoryIndexedIO(const char *bindName)
+void bindMemoryIndexedIO()
 {
-	IECorePython::RefCountedClass<MemoryIndexedIO, IndexedIO>( bindName )
+	IECorePython::RunTimeTypedClass<MemoryIndexedIO>()
 		.def("__init__", make_constructor( &IndexedIOHelper::constructorAtRoot<MemoryIndexedIO, ConstCharVectorDataPtr> ) )
 		.def("__init__", make_constructor( &IndexedIOHelper::constructor<MemoryIndexedIO, ConstCharVectorDataPtr> ) )
 		.def( "buffer", memoryIndexedIOBufferWrapper )

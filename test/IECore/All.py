@@ -120,7 +120,7 @@ from PrimitiveEvaluator import *
 from MeshPrimitiveEvaluator import *
 from PrimitiveImplicitSurfaceFunction import *
 from MeshPrimitiveImplicitSurfaceOp import *
-from Interned import *
+from InternedStringTest import InternedStringTest
 from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
@@ -265,6 +265,10 @@ from TimeCodeParameterTest import TimeCodeParameterTest
 from OptionsTest import OptionsTest
 from NullObjectTest import NullObjectTest
 from ModelCacheTest import ModelCacheTest
+from SceneCacheTest import SceneCacheTest
+from LinkedSceneTest import LinkedSceneTest
+from StandardRadialLensModelTest import StandardRadialLensModelTest
+from LensDistortOpTest import LensDistortOpTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

@@ -123,14 +123,27 @@ IndexedIO *Object::SaveContext::rawContainer()
 
 void Object::SaveContext::save( const Object *toSave, IndexedIO *container, const IndexedIO::EntryID &name )
 {
+	if ( !toSave )
+	{
+		throw Exception( "Error trying to save NULL pointer object!" );
+	}
+
 	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
 	{
-		container->write( name, it->second );
+		container->write( name, &(it->second[0]), it->second.size() );
 	}
 	else
 	{
-		IndexedIOPtr nameIO = container->subdirectory( name, IndexedIO::CreateIfMissing );
+		bool rootObject = ( m_savedObjects->size() == 0 );
+		if ( rootObject )
+		{
+			if ( container->hasEntry( name ) )
+			{
+				container->remove( name );
+			}
+		}
+		IndexedIOPtr nameIO = container->createSubdirectory( name );
 
 		IndexedIO::EntryIDList pathParts;
 		nameIO->path( pathParts );
@@ -138,11 +151,17 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 
 		nameIO->write( g_typeEntry, toSave->typeName() );
 
-		IndexedIOPtr dataIO = nameIO->subdirectory( g_dataEntry, IndexedIO::CreateIfMissing );
+		IndexedIOPtr dataIO = nameIO->createSubdirectory( g_dataEntry );
 		dataIO->removeAll();
 
 		SaveContext context( dataIO, m_savedObjects );
 		toSave->save( &context );
+
+		// Objects saved on a file can be committed to disk to free memory.
+		if ( rootObject )
+		{
+			nameIO->commit();
+		}
 	}
 }
 
@@ -188,9 +207,11 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 	if( e.entryType()==IndexedIO::File )
 	{
 		IndexedIO::EntryIDList pathParts;
-		if ( e.dataType() == IndexedIO::SymbolicLink )
+		if ( e.dataType() == IndexedIO::InternedStringArray )
 		{
-			container->read( name, pathParts );
+			pathParts.resize( e.arrayLength() );
+			InternedString *p = &(pathParts[0]); 
+			container->read( name, p, e.arrayLength() );
 		}
 		else 
 		{

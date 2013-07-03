@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -82,7 +82,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		n4 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", parent=geo, contextArgs=contextArgs )
 		self.assertEqual( n4.path(), "/obj/geo1/test1" )
 		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
-		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieCortexConverter" )
 		
 		# test automatic conversion and output connections
 		mountain = geo.createNode( "mountain" )
@@ -91,7 +91,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( n5.path(), "/obj/geo1/test2" )
 		self.assertEqual( len(n5.outputConnectors()[0]), 1 )
 		converter = n5.outputConnectors()[0][0].outputNode()
-		self.assertEqual( converter.type().name(), "ieToHoudiniConverter" )
+		self.assertEqual( converter.type().name(), "ieCortexConverter" )
 		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
 		outputNode = converter.outputConnectors()[0][0].outputNode()
 		self.assertEqual( outputNode.type().name(), "mountain" )
@@ -292,7 +292,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 8 )
-		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
@@ -313,7 +313,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 8 )
-		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
@@ -334,7 +334,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 8 )
-		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
@@ -355,7 +355,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 8 )
-		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
@@ -379,7 +379,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 8 )
-		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 208 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
@@ -415,21 +415,37 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( len(proc.geometry().points()), 8 )
 		self.assertEqual( len(proc2.geometry().points()), 8 )
 		self.assertEqual( len(op.geometry().points()), 8 )
-		converterSop = op.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = op.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.numFaces(), 100 )
-		converterSop = proc2.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc2.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 100 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.numFaces(), 100 )
-		converterSop = proc.createOutputNode( "ieToHoudiniConverter" )
+		converterSop = proc.createOutputNode( "ieCortexConverter" )
 		self.assertEqual( len(converterSop.geometry().points()), 208 )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.numFaces(), 206 )
+	
+	def testAnimatedValues( self ) :
+		
+		sphere = IECoreHoudini.FnProceduralHolder.create( "test", "sphereProcedural", 1 )
+		fn = IECoreHoudini.FnProceduralHolder( sphere )
+		sphere.parm( "parm_radius" ).setExpression( "$FF" )
+		hou.setFrame( 1 )
+		self.assertEqual( sphere.evalParm( "parm_radius" ), 1 )
+		self.assertEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 1 )
+		hou.setFrame( 12.25 )
+		self.assertEqual( sphere.evalParm( "parm_radius" ), 12.25  )
+		# values haven't been flushed yet
+		self.assertAlmostEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 1 )
+		# so we flush them
+		fn.setParameterisedValues()
+		self.assertAlmostEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 12.25 )
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

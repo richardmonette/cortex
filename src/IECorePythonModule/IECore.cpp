@@ -48,6 +48,7 @@
 #include "IECorePython/KDTreeBinding.h"
 #include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/DataBinding.h"
+#include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.h"
 #include "IECorePython/ObjectBinding.h"
@@ -160,7 +161,7 @@
 #include "IECorePython/MeshPrimitiveImplicitSurfaceFunctionBinding.h"
 #include "IECorePython/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECorePython/TriangulateOpBinding.h"
-#include "IECorePython/InternedBinding.h"
+#include "IECorePython/InternedStringBinding.h"
 #include "IECorePython/SpherePrimitiveBinding.h"
 #include "IECorePython/SpherePrimitiveEvaluatorBinding.h"
 #include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
@@ -215,6 +216,8 @@
 #include "IECorePython/SRGBToLinearOpBinding.h"
 #include "IECorePython/LinearToCineonOpBinding.h"
 #include "IECorePython/CineonToLinearOpBinding.h"
+#include "IECorePython/LinearToAlexaLogcOpBinding.h"
+#include "IECorePython/AlexaLogcToLinearOpBinding.h"
 #include "IECorePython/CubeColorLookupBinding.h"
 #include "IECorePython/CubeColorLookupDataBinding.h"
 #include "IECorePython/CubeColorTransformOpBinding.h"
@@ -310,7 +313,14 @@
 #include "IECorePython/OptionsBinding.h"
 #include "IECorePython/MPlayDisplayDriverBinding.h"
 #include "IECorePython/ModelCacheBinding.h"
-
+#include "IECorePython/SceneInterfaceBinding.h"
+#include "IECorePython/SharedSceneInterfacesBinding.h"
+#include "IECorePython/SampledSceneInterfaceBinding.h"
+#include "IECorePython/SceneCacheBinding.h"
+#include "IECorePython/LinkedSceneBinding.h"
+#include "IECorePython/LensModelBinding.h"
+#include "IECorePython/StandardRadialLensModelBinding.h"
+#include "IECorePython/LensDistortOpBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -329,6 +339,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCompoundObject();
 	bindTypeId();
 	bindData();
+	bindGeometricTypedData();
 	bindAllSimpleTypedData();
 	bindAllVectorTypedData();
 	bindCompoundData();
@@ -448,7 +459,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshPrimitiveImplicitSurfaceFunction();
 	bindMeshPrimitiveImplicitSurfaceOp();
 	bindTriangulateOp();
-	bindInterned();
+	bindInternedString();
 	bindSpherePrimitive();
 	bindSpherePrimitiveEvaluator();
 	bindInverseDistanceWeightedInterpolation();
@@ -517,6 +528,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinearToSRGBOp();
 	bindCineonToLinearOp();
 	bindLinearToCineonOp();
+	bindAlexaLogcToLinearOp();
+	bindLinearToAlexaLogcOp();
 	bindCubeColorLookup();
 	bindCubeColorLookupData();
 	bindCubeColorTransformOp();
@@ -623,6 +636,14 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindOptions();
 	bindMPlayDisplayDriver();
 	bindModelCache();
+	bindSceneInterface();
+	bindSharedSceneInterfaces();
+	bindSampledSceneInterface();
+	bindSceneCache();
+	bindLinkedScene();
+	bindLensModel();
+	bindStandardRadialLensModel();
+	bindLensDistortOp();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
