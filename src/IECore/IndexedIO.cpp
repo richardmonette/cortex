@@ -53,7 +53,7 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 {
 	IndexedIOPtr result = 0;
 
-	std::string extension = fs::path( path ).extension();
+	std::string extension = fs::extension(path);
 
 	const CreatorMap &createFns = getCreateFns();
 
