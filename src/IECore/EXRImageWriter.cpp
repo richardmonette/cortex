@@ -113,6 +113,23 @@ void EXRImageWriter::constructCommon()
 
 	parameters()->addParameter( compressionParameter );
 
+	IECore::StringParameter::PresetsContainer bitDepthPresets;
+
+	bitDepthPresets.push_back( IECore::StringParameter::Preset( "Auto", "auto" ) );
+	bitDepthPresets.push_back( IECore::StringParameter::Preset( "UInt", "uint" ) );
+	bitDepthPresets.push_back( IECore::StringParameter::Preset( "Half", "half" ) );
+	bitDepthPresets.push_back( IECore::StringParameter::Preset( "Float", "float" ) );
+
+	StringParameterPtr bitDepthParameter = new IECore::StringParameter(
+		"bitDepth",
+		"Bit depth for channel data",
+		"auto",
+		bitDepthPresets,
+		true
+	);
+
+	parameters()->addParameter( bitDepthParameter );
+
 }
 
 std::string EXRImageWriter::destinationColorSpace() const
@@ -128,6 +145,16 @@ IntParameter * EXRImageWriter::compressionParameter()
 const IntParameter * EXRImageWriter::compressionParameter() const
 {
 	return parameters()->parameter< IntParameter >( "compression" );
+}
+
+StringParameter * EXRImageWriter::bitDepthParameter()
+{
+	return parameters()->parameter< StringParameter >( "bitDepth" );
+}
+
+const StringParameter * EXRImageWriter::bitDepthParameter() const
+{
+	return parameters()->parameter< StringParameter >( "bitDepth" );
 }
 
 static void blindDataToHeader( const CompoundData *blindData, Imf::Header &header, std::string prefix = "" )
@@ -253,7 +280,22 @@ void EXRImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 				throw IOException( ( boost::format("EXRImageWriter: Channel \"%s\" has no data") % name ).str() );
 			}
 
-			switch (channelData->typeId())
+			int channelDataTypeId = channelData->typeId();
+
+			if (bitDepthParameter()->getTypedValue() == "uint")
+			{
+				channelDataTypeId = UIntVectorDataTypeId;
+			}
+			else if (bitDepthParameter()->getTypedValue()  == "half")
+			{
+				channelDataTypeId = HalfVectorDataTypeId;
+			}
+			else if (bitDepthParameter()->getTypedValue()  == "float")
+			{
+				channelDataTypeId = FloatVectorDataTypeId;
+			}
+
+			switch (channelDataTypeId)
 			{
 			case FloatVectorDataTypeId:
 				writeTypedChannel<float>(name, dataWindow,

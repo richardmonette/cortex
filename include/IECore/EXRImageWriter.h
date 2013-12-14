@@ -70,6 +70,9 @@ class EXRImageWriter : public ImageWriter
 		IntParameter * compressionParameter();
 		const IntParameter * compressionParameter() const;
 
+		StringParameter * bitDepthParameter();
+		const StringParameter * bitDepthParameter() const;
+
 	private:
 
 		void constructCommon();
