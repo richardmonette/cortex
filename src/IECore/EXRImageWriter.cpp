@@ -280,22 +280,30 @@ void EXRImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 				throw IOException( ( boost::format("EXRImageWriter: Channel \"%s\" has no data") % name ).str() );
 			}
 
-			int channelDataTypeId = channelData->typeId();
+			std::cout << bitDepthParameter()->getTypedValue() << std::endl;
 
 			if (bitDepthParameter()->getTypedValue() == "uint")
 			{
-				channelDataTypeId = UIntVectorDataTypeId;
+				channelData = runTimeCast<const UIntVectorData>(channelData);
 			}
-			else if (bitDepthParameter()->getTypedValue()  == "half")
+			else if (bitDepthParameter()->getTypedValue() == "half")
 			{
-				channelDataTypeId = HalfVectorDataTypeId;
+				channelData = runTimeCast<const HalfVectorData>(channelData);
 			}
-			else if (bitDepthParameter()->getTypedValue()  == "float")
+			else if (bitDepthParameter()->getTypedValue() == "float")
 			{
-				channelDataTypeId = FloatVectorDataTypeId;
+				channelData = runTimeCast<const FloatVectorData>(channelData);
 			}
 
-			switch (channelDataTypeId)
+			/*
+			>>> import IECore
+			>>> img = IECore.Reader.create('/tmp/32bit.exr').read()
+			>>> writer = IECore.EXRImageWriter.create(img, '/tmp/16writetest.exr')
+			>>> writer['bitDepth'] = IECore.StringData('half')
+			>>> writer.write()
+			*/
+
+			switch (channelData->typeId())
 			{
 			case FloatVectorDataTypeId:
 				writeTypedChannel<float>(name, dataWindow,
